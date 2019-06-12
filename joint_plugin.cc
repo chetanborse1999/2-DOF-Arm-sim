@@ -7,7 +7,10 @@
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
-#include "std_msgs/Float32.h"
+// #include "std_msgs/Float32.h"
+#include <package1/Num.h>
+
+
 
 // In the real file these quotes are greater-than and less-than but I
 // don't know how to get that to show up in my question
@@ -44,7 +47,7 @@ this->rosNode.reset(new ros::NodeHandle("gazebo_client"));
 
 // Create a named topic, and subscribe to it.
 ros::SubscribeOptions so =
-  ros::SubscribeOptions::create<std_msgs::Float32>(
+  ros::SubscribeOptions::create<package1::Num>(
       "/" + this->model->GetName() + "/vel_cmd",
       1,
       boost::bind(&ModelControl::OnRosMsg, this, _1),
@@ -71,44 +74,30 @@ this->rosQueueThread =
       double currAngle2 = this->joint2->GetAngle(0).Radian();
       printf("Current angle1: %f\n", currAngle1);
       printf("Current angle2: %f\n", currAngle2);
-      printf("Set angle: %f\n", setAngle);
+      // setAngle1 = 4.71+1.57/2;
+      // setAngle2 = 1.57;
 
-      if (setAngle-currAngle1>0)
+      this->joint1->SetVelocity(0, 5*(setAngle1-currAngle1));
+      
+      if (currAngle1<setAngle1+0.05 && currAngle1>setAngle1-0.05)
       {
-        this->joint1->SetVelocity(0, 3);
-      }
-      else if (setAngle-currAngle1<0)
-      {
-        this->joint1->SetVelocity(0, -3);
-      }
-      else
-      {
+        // this->joint1->SetPosition(0, setAngle1);
         this->joint1->SetVelocity(0, 0);
       }
-      if (currAngle1<setAngle+0.1 && currAngle1>setAngle-0.1)
+
+      this->joint2->SetVelocity(0, 5*(setAngle2-currAngle2));
+      
+      if (currAngle2<setAngle2+0.05 && currAngle2>setAngle2-0.05)
       {
-        this->joint1->SetPosition(0, setAngle);
-        this->joint1->SetVelocity(0, 0);
-      }
-      if (setAngle-currAngle1>0)
-      {
-        this->joint2->SetVelocity(0, 3);
-      }
-      else if (setAngle-currAngle1<0)
-      {
-        this->joint2->SetVelocity(0, -3);
-      }
-      else
-      {
-        this->joint2->SetVelocity(0, 0);
-      }
-      if (currAngle1<setAngle+0.1 && currAngle1>setAngle-0.1)
-      {
-        this->joint2->SetPosition(0, setAngle);
+        // this->joint2->SetPosition(0, setAngle2);
         this->joint2->SetVelocity(0, 0);
       }
        
-      
+      if ((currAngle1<setAngle1+0.075 && currAngle1>setAngle1-0.075)&&(currAngle2<setAngle2+0.075 && currAngle2>setAngle2-0.075))
+      {
+        this->joint1->SetPosition(0, setAngle1);
+        this->joint2->SetPosition(0, setAngle2);
+      }
 
       // if (currAngle1<rad+0.1 && currAngle1>rad-0.1)
       // {
@@ -120,13 +109,16 @@ this->rosQueueThread =
     /// \brief Handle an incoming message from ROS
 /// \param[in] _msg A float value that is used to set the velocity
 /// of the Velodyne.
-public: void OnRosMsg(const std_msgs::Float32ConstPtr &msg1)
+public: void OnRosMsg(const package1::NumConstPtr &msg1)
 {
 
   // this->joint1->SetVelocity(0, _msg->data);
-  setAngle = msg1->data;
-  // setAngle2 = _msg2->data; 
+  setAngle1 = msg1->angle1;
+  setAngle2 = msg1->angle2;
+
   
+  // setAngle2 = _msg2->data; 
+
   // else
   // {
   //   this->joint1->SetVelocity(0, 0);
@@ -155,8 +147,9 @@ private: void QueueThread()
     // Pointer to the model
   private: physics::ModelPtr model;
 
-  double setAngle;
-  // double setAngle2;
+  // double setAngle;
+  double setAngle1;
+  double setAngle2;
 
     // Pointer to the update event connection
   private: event::ConnectionPtr updateConnection;
