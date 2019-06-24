@@ -10,4 +10,11 @@ $ mkdir build
 $ cd build
 $ cmake ../
 $ make
+$ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:~/ <path_to_build_folder>
 
+Copy gazebo_pkg folder in ~/catkin_ws/src, then run
+$ cd ~/catkin_ws
+$ catkin_make
+
+To start sim, run
+$ roslaunch gazebo_pkg start.launch
