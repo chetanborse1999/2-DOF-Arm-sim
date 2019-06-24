@@ -8,7 +8,7 @@ getpose.py - returns pose(coodinates and orientation)
 Build folder - contains build files after running 'make', delete and run in 
 '~/2-DOF-Arm-sim/
 
-$ mkdir build \n
+$ mkdir build
 $ cd build
 $ cmake ../
 $ make
