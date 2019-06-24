@@ -10,7 +10,7 @@ $ mkdir build
 $ cd build
 $ cmake ../
 $ make
-$ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:~/ <path_to_build_folder>
+$ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:~/ {path_to_build_folder}
 
 Copy gazebo_pkg folder in ~/catkin_ws/src, then run
 $ cd ~/catkin_ws
