@@ -8,12 +8,8 @@
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
 // #include "std_msgs/Float32.h"
-#include <package1/Num.h>
+#include <gazebo_pkg/Angles.h>
 
-
-
-// In the real file these quotes are greater-than and less-than but I
-// don't know how to get that to show up in my question
 
 namespace gazebo
 {
