@@ -47,7 +47,7 @@ this->rosNode.reset(new ros::NodeHandle("gazebo_client"));
 
 // Create a named topic, and subscribe to it.
 ros::SubscribeOptions so =
-  ros::SubscribeOptions::create<package1::Num>(
+  ros::SubscribeOptions::create<gazebo_pkg::Angles>(
       "/" + this->model->GetName() + "/vel_cmd",
       1,
       boost::bind(&ModelControl::OnRosMsg, this, _1),
@@ -109,7 +109,7 @@ this->rosQueueThread =
     /// \brief Handle an incoming message from ROS
 /// \param[in] _msg A float value that is used to set the velocity
 /// of the Velodyne.
-public: void OnRosMsg(const package1::NumConstPtr &msg1)
+public: void OnRosMsg(const gazebo_pkg::AnglesConstPtr &msg1)
 {
 
   // this->joint1->SetVelocity(0, _msg->data);
