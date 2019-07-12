@@ -8,7 +8,7 @@
 import rospy
 from std_srvs.srv import Empty
 from gazebo_msgs.srv import GetLinkState
-from package1.msg import Num
+from gazebo_pkg.msg import Angles
 import numpy as np
 import time
 import sys
@@ -114,9 +114,9 @@ class ArmEnv():
 		self.net_reward = 0
 
 	def publisher(self, angles):
-		pub = rospy.Publisher('/2links_plugin_2/vel_cmd', Num, queue_size=1, latch=True)
+		pub = rospy.Publisher('/2links_plugin_2/vel_cmd', Angles, queue_size=1, latch=True)
 		rospy.init_node('set_angle', anonymous=True, disable_signals=True)
-		msg = Num()
+		msg = Angles()
 		msg.angle1 = angles[0]
 		msg.angle2 = angles[1]
 		pub.publish(msg)
