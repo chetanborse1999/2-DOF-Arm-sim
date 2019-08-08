@@ -8,12 +8,20 @@
 import rospy
 from std_srvs.srv import Empty
 from gazebo_msgs.srv import GetLinkState
+from gazebo_msgs.srv import GetJointProperties
 from gazebo_pkg.msg import Angles
 import numpy as np
 import time
 import sys
 
-
+class Space():
+	def __init__(self, rows, columns, low, high):
+		self.shape = [rows, columns]
+		self.low = low
+		self.high = high
+	def sample(self):
+		sampled = [np.random.uniform(self.low, self.high), np.random.uniform(self.low, self.high)]
+		return np.array(sampled)
 
 class ArmEnv():
 
@@ -25,13 +33,17 @@ class ArmEnv():
 		self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
 		self.get_end_effector_pos = rospy.ServiceProxy('/gazebo/get_link_state', GetLinkState)
 		self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+		self.get_joint_properties = rospy.ServiceProxy('/gazebo/get_joint_properties', GetJointProperties)
 		self.target = target
-		self.angle1 = 0.0
-		self.angle2 = 0.0
+		self.max_angle = 3.14
+		self.min_angle = -3.14
+		self.n_joints = 2
+		self.observation_space = Space(2, 1, None, None)
+		self.action_space = Space(self.n_joints, 1, self.min_angle, self.max_angle)
 
 
 	def step(self, action):
-		print('step')
+		# print('step')
 		self.unpause_sim()
 		self.set_action(action)
 		# self.pause_sim()
@@ -44,7 +56,7 @@ class ArmEnv():
 		return obs, reward, done, info
 
 	def reset(self):
-		print('reset')
+		# print('reset')
 		self.reset_sim()
 		self.update_episode() #update episode no and set net reward to zero
 		obs = self.get_obs()
@@ -55,24 +67,28 @@ class ArmEnv():
 		sys.exit()
 
 	def unpause_sim(self):
-		print('unpausing sim')
+		# print('unpausing sim')
 		self.unpause()
 
 	def pause_sim(self):
-		print('pausing sim')
+		# print('pausing sim')
 		self.pause()
 
 	def set_action(self, action):
-		print('setting action:', action)
-		self.pause_sim()
+		# print('setting action:', action)
+		# self.pause_sim()
 		self.publisher(action)
 		self.unpause_sim()
 
 	def get_obs(self):
 		end_effector_pos = self.get_end_effector_pos(link_name='2links_plugin_2::link_0_0', reference_frame='2links_plugin_2::link')
+		angle1 = self.get_joint_properties(joint_name='link_JOINT_1')
+		angle2 = self.get_joint_properties(joint_name='link_0_JOINT_2')
+		angle1 = angle1.position[0]
+		angle2 = angle2.position[0]
 		x = end_effector_pos.link_state.pose.position.x
 		y = end_effector_pos.link_state.pose.position.y
-		return (x, y)
+		return np.array([x, y])
 
 	def is_done(self, observation):
 		tolerance = 0.1
@@ -80,9 +96,10 @@ class ArmEnv():
 		x_max = self.target[0]+tolerance
 		y_min = self.target[1]-tolerance
 		y_max = self.target[1]+tolerance
-		print(x_min, x_max, y_min, y_max)
+		# print(x_min, x_max, y_min, y_max)
 		if (observation[0]>x_min and observation[0]<x_max):
 			if (observation[1]>y_min and observation[1]<y_max):
+				print('DONE DONE DONE!!!!!')
 				return True
 			else:
 				return False
@@ -102,12 +119,12 @@ class ArmEnv():
 		return np.sqrt((target[0]-observation[0])**2 + (target[1]-observation[1])**2)
 
 	def reset_sim(self):
-		print('reset')
+		# print('reset')
 		self.pause_sim()
 		self.reset_simulation()
 		self.publisher((0.0, 0.0))
 		self.unpause_sim()
-		time.sleep(2)
+		# time.sleep(1)
 
 	def update_episode(self):
 		self.episode_no +=1
